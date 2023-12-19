@@ -1,30 +1,19 @@
+version: '2'
 name: faucet
 services:
-    influxdb:
-        image: 'influxdb:latest'
-        ports:
-            - '8086:8086'
-            - '8083:8083'
-        volumes:
-            - './faucet/opt/influxdb/shared/data/db:/var/lib/influxdb'
-        environment:
-            INFLUXDB_DB: 'faucet'
-            INFLUXDB_HTTP_AUTH_ENABLED: 'true'
-            INFLUXDB_ADMIN_USER: 'faucet'
-            INFLUXDB_ADMIN_PASSWORD: 'faucet'
     prometheus:
+        container_name: prometheus
         image: 'prom/prometheus:v2.48.1'
         user: 'root'
         ports:
             - '9090:9090'
         volumes:
-            - './faucet/opt/prometheus/:/prometheus'
-            - './faucet/etc/prometheus/prometheus-docker-compose.yml:/etc/prometheus/prometheus.yml'
-            - './faucet/etc/prometheus/faucet.rules.yml:/etc/prometheus/faucet.rules.yml'
+            - './faucet/etc/prometheus:/etc/prometheus'
         links:
             - faucet
             - gauge
     grafana:
+        container_name: grafana
         image: 'grafana/grafana:10.2.2'
         user: 'root'
         ports:
@@ -32,22 +21,22 @@ services:
         volumes:
             - './faucet/opt/grafana:/var/lib/grafana'
         links:
-            - influxdb
             - prometheus
     gauge:
+        container_name: gauge
+        image: 'faucet/gauge'
         volumes:
             - ./faucet.yaml:/etc/faucet/faucet.yaml
+            - ./gauge.yaml:/etc/faucet/gauge.yaml
         ports:
             - 6654:6653
             - 9303:9303
-        image: faucet/gauge
-        links:
-            - influxdb
     faucet:
         container_name: faucet
+        image: 'faucet/faucet'
         volumes:
             - ./faucet.yaml:/etc/faucet/faucet.yaml
+            - ./gauge.yaml:/etc/faucet/gauge.yaml
         ports:
             - 6653:6653
             - 9302:9302
-        image: faucet/faucet
