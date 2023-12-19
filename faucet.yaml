@@ -1,0 +1,55 @@
+dps:
+    switch-1:
+        dp_id: 0x1
+        timeout: 11800
+        arp_neighbor_timeout: 3600
+        interfaces:
+            1:
+                tagged_vlans: [vlan100, vlan200, vlan300]
+            2:
+                tagged_vlans: [vlan100, vlan200, vlan300]
+            3:
+                native_vlan: vlan100
+            4:
+                native_vlan: vlan200
+            5:
+                native_vlan: vlan300
+    switch-2:
+        dp_id: 0x2
+        timeout: 11800
+        arp_neighbor_timeout: 3600
+        interfaces:
+            1:
+                tagged_vlans: [vlan100, vlan200, vlan300]
+            2:
+                native_vlan: vlan100
+            3:
+                native_vlan: vlan200
+            4:
+                native_vlan: vlan300
+    switch-3:
+        dp_id: 0x3
+        timeout: 11800
+        arp_neighbor_timeout: 3600
+        interfaces:
+            1:
+                tagged_vlans: [vlan100, vlan200, vlan300]
+            2:
+                native_vlan: vlan100
+            3:
+                native_vlan: vlan200
+            4:
+                native_vlan: vlan300
+vlans:
+    vlan100:
+        vid: 100
+        faucet_vips: ["10.1.0.254/24"]
+    vlan200:
+        vid: 200
+        faucet_vips: ["10.2.0.254/24"]
+    vlan300:
+        vid: 300
+        faucet_vips: ["10.3.0.254/24"]
+routers:
+    router-1:
+        vlans: [100, 200, 300]
