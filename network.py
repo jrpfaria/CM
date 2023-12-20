@@ -4,7 +4,8 @@ from mininet.node import RemoteController
 net = Mininet(controller=None)
 
 # Add controller and switches to the network
-c0 = net.addController(name='c0', controller=RemoteController, ip='localhost', protocol='tcp')
+c0 = net.addController(name='c0', controller=RemoteController, ip='localhost', protocol='tcp', port=6653)
+c1 = net.addController(name='c1', controller=RemoteController, ip='localhost', protocol='tcp', port=6654)
 s1 = net.addSwitch('s1')
 s2 = net.addSwitch('s2')
 s3 = net.addSwitch('s3')
