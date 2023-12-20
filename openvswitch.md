@@ -1,11 +1,8 @@
 # Open-vSwitch for dummies
-This is meant to be a 1:1 copy of the Open vSwitch tutorial that only highlights the hands-on information.
+This is meant to be a 1:1 copy of the Open vSwitch tutorial that only highlights the hands-on information. ~This is incomplete, for more details check the Open-vSwitch official Tutorial.
 
 ## Topics
 - OVS Faucet Tutorial
-- OVS IPsec Tutorial
-- Open vSwitch Advanced Features
-- OVS Conntrack Tutorial
 
 ## Approach
 
@@ -405,7 +402,3 @@ You can now check the tables with:
 ```bash
 cat faucet.log | grep "table config"
 ```
-
-
-#### ACLs
-#### Finishing Up
