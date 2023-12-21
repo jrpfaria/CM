@@ -21,6 +21,9 @@ h2 = net.addHost('h2', ip='10.2.0.2/24')
 net.addLink(h2, s1)
 h3 = net.addHost('h3', ip='10.3.0.3/24')
 net.addLink(h3, s1)
+# host used for mirror
+h10 = net.addHost('h10',ip='10.3.0.5/24')
+net.addLink(h10,s1)
 
 # Add hosts and connect them to s2
 h4 = net.addHost('h4', ip='10.1.0.4/24')

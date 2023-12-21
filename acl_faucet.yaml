@@ -1,0 +1,142 @@
+dps:
+    switch-1:
+        dp_id: 0x1
+        timeout: 11800
+        arp_neighbor_timeout: 3600
+        interfaces:
+            1:
+                tagged_vlans: [vlan100, vlan200, vlan300]
+            2:
+                tagged_vlans: [vlan100, vlan200, vlan300]
+            3:
+                native_vlan: vlan100
+            4:
+                native_vlan: vlan200
+            5:
+                native_vlan: vlan300
+                acls_in:
+                    - block-ping
+            6:
+                native_vlan: vlan300
+    switch-2:
+        dp_id: 0x2
+        timeout: 11800
+        arp_neighbor_timeout: 3600
+        interfaces:
+            1:
+                tagged_vlans: [vlan100, vlan200, vlan300]
+            2:
+                native_vlan: vlan100
+                acls_in: 
+                    - conntrack_fw
+            3:
+                native_vlan: vlan200
+                acls_in: 
+                    - conntrack_fw
+            4:
+                native_vlan: vlan300
+    switch-3:
+        dp_id: 0x3
+        timeout: 11800
+        arp_neighbor_timeout: 3600
+        interfaces:
+            1:
+                tagged_vlans: [vlan100, vlan200, vlan300]
+            2:
+                native_vlan: vlan100
+            3:
+                native_vlan: vlan200
+            4:
+                native_vlan: vlan300
+vlans:
+    vlan100:
+        vid: 100
+        faucet_vips: ["10.1.0.254/24"]
+    vlan200:
+        vid: 200
+        faucet_vips: ["10.2.0.254/24"]
+    vlan300:
+        vid: 300
+        faucet_vips: ["10.3.0.254/24"]
+routers:
+    router-1:
+        vlans: [100, 200, 300]
+acls:
+    block-ping:
+        - rule:
+            dl_type: 0x800      # IPv4
+            ip_proto: 1         # ICMP
+            actions:
+                allow: False
+                mirror: 6       # Sendo mirror of packages to port 6
+        - rule:
+            dl_type: 0x86dd     # IPv6
+            ip_proto: 58        # ICMPv6
+            actions:
+                allow: False
+    
+    block-http:
+        - rule:
+            dl_type: 0x800  # IPv4
+            ip_proto: 6     # TCP
+            tcp_src: 80     # incoming HTTP
+            tcp_dst: 80     # outgoing HTTP
+            actions:
+                allow: false
+
+    allow-ping:
+        - rule:
+            dl_type: 0x800      # IPv4
+            ip_proto: 1         # ICMP
+            actions:
+                allow: True
+        - rule:
+            dl_type: 0x86dd     # IPv6
+            ip_proto: 58        # ICMPv6
+            actions:
+                allow: True
+
+    conntrack_fw:
+        # Permit all ARP traffic such that hosts can resolve one another's MACs
+        - rule:
+            eth_type: 0x0806 # arp
+            actions:
+                allow: True
+        # Begin tracking ALL untracked IPv4 connections
+        - rule:
+            eth_type: 0x0800 # ipv4
+            ct_state: 0/0x20  # match -trk (untracked)
+            actions:
+                ct:
+                    zone: 10 # arbitrary conntrack zone ID to match against later
+                    table: 0
+        # Commit NEW IPv4 connections from host1 to host2
+        - rule:
+            eth_type: 0x0800 # ipv4
+            ipv4_src: 10.1.0.4
+            ipv4_dst: 10.2.0.5
+            ct_state: 0x21/0x21 # match +new - packets to establish a new connection
+            actions:
+                ct:
+                    zone: 10  # the same conntrack zone ID as above
+                    flags: 1  # "commit" the new connection
+                    table: 1  # implicit "allow" new connection packet(s) via faucet table 1
+        - rule:
+            eth_type: 0x0800 # ipv4
+            ct_zone: 10 # match packets associated with our conntrack zone ID
+            ct_state: 0x22/0x22 # match +est - packets in an established connection
+            actions:
+                allow: True
+        # Block all unwanted packets and new connections from host2 to host1
+        - rule:
+            eth_type: 0x0800 # ipv4
+            ipv4_src: 10.2.0.5
+            ipv4_dst: 10.1.0.4
+            actions:
+                allow: False
+
+    allow-all:
+        - rule:
+            actions:
+                allow: True
+
