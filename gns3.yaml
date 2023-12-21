@@ -1,0 +1,44 @@
+---
+vlans:
+    office:
+        vid: 100
+        description: "office network"
+        faucet_mac: "0e:00:00:00:10:01"
+        faucet_vips:
+            - '10.0.100.254/24'
+            - '2001:100::1/64'
+            - 'fe80::c00:00ff:fe00:1001/64'
+    guest:
+        vid: 200
+        description: "guest network"
+        faucet_mac: "0e:00:00:00:20:01"
+        faucet_vips:
+            - '10.0.200.254/24'
+            - '2001:200::1/64'
+            - 'fe80::c00:00ff:fe00:2001/64'
+
+routers:
+    router-office-guest:
+        vlans: [office, guest]
+
+dps:
+    sw1:
+        dp_id: 0x1
+        hardware: "Open vSwitch"
+        interfaces:
+            1:
+                name: "h1"
+                description: "host1 container"
+                native_vlan: office
+            2:
+                name: "h2"
+                description: "host2 container"
+                native_vlan: office
+            3:
+                name: "h3"
+                description: "host3 container"
+                native_vlan: guest
+            4:
+                name: "h4"
+                description: "host4 container"
+                native_vlan: guest
